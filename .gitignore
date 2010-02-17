@@ -1,4 +1,4 @@
 .DS_Store
- 
-drupal/sites/default/settings.php
-drupal/sites/default/files/imagecache/**/*
+
+sites/default/settings.php
+sites/default/files/imagecache/**/*
