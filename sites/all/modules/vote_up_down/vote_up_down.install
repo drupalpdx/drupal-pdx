@@ -1,0 +1,40 @@
+<?php
+// $Id: vote_up_down.install,v 1.4.2.1 2008/11/15 11:58:16 lut4rp Exp $
+
+/**
+ * @file
+ * The .install file, that contains the schema for the vote_up_down.module
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function vote_up_down_install() {
+  drupal_install_schema('vote_up_down');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function vote_up_down_schema() {
+  return array();
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function vote_up_down_uninstall() {
+  drupal_uninstall_schema('vote_up_down');
+  variable_del('vote_up_down_node_types');
+  variable_del('vote_up_down_widget_style_node');
+  variable_del('vote_up_down_widget_node');
+  variable_del('vote_up_down_link_node');
+  variable_del('vote_up_down_widget_style_comment');
+  variable_del('vote_up_down_widget_comment');
+  variable_del('vote_up_down_link_comment');
+  variable_del('vote_up_down_tag');
+  variable_del('vote_up_down_anonymous_vote');
+  variable_del('vote_up_down_reset_vote');
+  variable_del('userpoints_vote_up_down');
+  variable_del('userpoints_actions');
+}
