@@ -1,0 +1,17 @@
+$Id: CHANGELOG.txt,v 1.8.2.3 2009/01/18 20:55:26 lut4rp Exp $
+
+XXXXXXXX XX, XXXX - 6.x-1.0
+---------------------------
+[Pratul Kalia]
+- Code ported to work with Drupal 6 core.
+- Lots of old PHP functions were replaced by newer ones.
+- The Administration page was re-structured.
+- Added SimpleTests.
+- Forked Storylink into a separate project. (see http://drupal.org/project/storylink)
+
+September 30, 2008 - 6.x-1.x-dev
+--------------------------------
+[Pratul Kalia]
+- Took over maintainence of the package.
+- Did the initial conversion to Drupal 6.x for almost all files.
+

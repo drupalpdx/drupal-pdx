@@ -1,0 +1,12 @@
+; $Id: vote_up_down.info,v 1.5.2.5 2009/01/29 18:51:40 lut4rp Exp $
+name = Vote Up/Down
+description = "Allows adding an up/down voting widget to selected content types & comments."
+dependencies[] = votingapi
+package = Voting
+core = 6.x
+; Information added by drupal.org packaging script on 2009-08-26
+version = "6.x-1.0-beta6"
+core = "6.x"
+project = "vote_up_down"
+datestamp = "1251316027"
+
