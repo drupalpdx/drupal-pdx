@@ -617,7 +617,6 @@ ini_set('display_errors', TRUE);
 
 // Access check:
 if (!empty($update_free_access) || $user->uid == 1) {
-  drupal_session_start();
 
   include_once './includes/install.inc';
   include_once './includes/batch.inc';

@@ -1,5 +1,5 @@
 <?php
-// $Id: session.inc,v 1.44.2.6 2008/12/11 00:29:34 goba Exp $
+// $Id: session.inc,v 1.44.2.7 2010/03/04 00:15:28 goba Exp $
 
 /**
  * @file
@@ -17,8 +17,7 @@ function sess_close() {
 function sess_read($key) {
   global $user;
 
-  // Write and Close handlers are called after destructing objects
-  // since PHP 5.0.5.
+  // Write and Close handlers are called after destructing objects since PHP 5.0.5
   // Thus destructors can use sessions but session handler can't use objects.
   // So we are moving session closure before destructing objects.
   register_shutdown_function('session_write_close');
@@ -32,8 +31,9 @@ function sess_read($key) {
   // Otherwise, if the session is still active, we have a record of the client's session in the database.
   $user = db_fetch_object(db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.sid = '%s'", $key));
 
-  // We found the client's session record and they are an authenticated user
-  if ($user && $user->uid > 0) {
+  // We found the client's session record and they are an authenticated,
+  // active user.
+  if ($user && $user->uid > 0 && $user->status == 1) {
     // This is done to unserialize the data member of $user
     $user = drupal_unpack($user);
 
@@ -45,7 +45,8 @@ function sess_read($key) {
       $user->roles[$role->rid] = $role->name;
     }
   }
-  // We didn't find the client's record (session has expired), or they are an anonymous user.
+  // We didn't find the client's record (session has expired), or they are
+  // blocked, or they are an anonymous user.
   else {
     $session = isset($user->session) ? $user->session : '';
     $user = drupal_anonymous_user($session);
@@ -57,10 +58,11 @@ function sess_read($key) {
 function sess_write($key, $value) {
   global $user;
 
-  // If saving of session data is disabled, or if a new empty anonymous session
-  // has been started, do nothing. This keeps anonymous users, including
-  // crawlers, out of the session table, unless they actually have something
-  // stored in $_SESSION.
+  // If saving of session data is disabled or if the client doesn't have a session,
+  // and one isn't being created ($value), do nothing. This keeps crawlers out of
+  // the session table. This reduces memory and server load, and gives more useful
+  // statistics. We can't eliminate anonymous session table rows without breaking
+  // the throttle module and the "Who's Online" block.
   if (!session_save_session() || ($user->uid == 0 && empty($_COOKIE[session_name()]) && empty($value))) {
     return TRUE;
   }
@@ -84,12 +86,22 @@ function sess_write($key, $value) {
 
 /**
  * Called when an anonymous user becomes authenticated or vice-versa.
- *
- * This backport obsoletes this function, but a call to the new function
- * is kept here to maximize API consistency.
  */
 function sess_regenerate() {
-  drupal_session_regenerate();
+  $old_session_id = session_id();
+
+  // We code around http://bugs.php.net/bug.php?id=32802 by destroying
+  // the session cookie by setting expiration in the past (a negative
+  // value).  This issue only arises in PHP versions before 4.4.0,
+  // regardless of the Drupal configuration.
+  // TODO: remove this when we require at least PHP 4.4.0
+  if (isset($_COOKIE[session_name()])) {
+    setcookie(session_name(), '', time() - 42000, '/');
+  }
+
+  session_regenerate_id();
+
+  db_query("UPDATE {sessions} SET sid = '%s' WHERE sid = '%s'", session_id(), $old_session_id);
 }
 
 /**
@@ -116,32 +128,7 @@ function sess_count($timestamp = 0, $anonymous = true) {
  *   the session id
  */
 function sess_destroy_sid($sid) {
-  // Delete session data.
   db_query("DELETE FROM {sessions} WHERE sid = '%s'", $sid);
-
-  // If the session ID being destroyed is the one of the current user,
-  // clean-up his/her session data and cookie.
-  if ($sid == session_id()) {
-    global $user;
-
-    // Reset $_SESSION and $user to prevent a new session from being started
-    // in drupal_session_commit()
-    $_SESSION = array();
-    $user = drupal_anonymous_user();
-
-    // Unset the session cookie.
-    if (isset($_COOKIE[session_name()])) {
-      $params = session_get_cookie_params();
-
-      if (version_compare(PHP_VERSION, '5.2.0') === 1) {
-        setcookie(session_name(), '', $_SERVER['REQUEST_TIME'] - 3600, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
-      }
-      else {
-        setcookie(session_name(), '', $_SERVER['REQUEST_TIME'] - 3600, $params['path'], $params['domain'], $params['secure']);      
-      }
-      unset($_COOKIE[session_name()]);
-    }
-  }
 }
 
 /**
@@ -166,8 +153,21 @@ function sess_gc($lifetime) {
 }
 
 /**
- * Renamed to drupal_save_session(). Stub kept here for API compatibility.
+ * Determine whether to save session data of the current request.
+ *
+ * This function allows the caller to temporarily disable writing of session data,
+ * should the request end while performing potentially dangerous operations, such as
+ * manipulating the global $user object.  See http://drupal.org/node/218104 for usage
+ *
+ * @param $status
+ *   Disables writing of session data when FALSE, (re-)enables writing when TRUE.
+ * @return
+ *   FALSE if writing session data has been disabled. Otherwise, TRUE.
  */
 function session_save_session($status = NULL) {
-  return drupal_save_session($status);
+  static $save_session = TRUE;
+  if (isset($status)) {
+    $save_session = $status;
+  }
+  return ($save_session);
 }

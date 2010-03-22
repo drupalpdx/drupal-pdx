@@ -1,5 +1,5 @@
 <?php
-// $Id: menu.inc,v 1.255.2.32 2009/10/06 11:59:05 goba Exp $
+// $Id: menu.inc,v 1.255.2.34 2010/02/01 18:00:49 goba Exp $
 
 /**
  * @file
@@ -748,13 +748,14 @@ function menu_tree_output($tree) {
 
   $num_items = count($items);
   foreach ($items as $i => $data) {
-    $extra_class = NULL;
+    $extra_class = array();
     if ($i == 0) {
-      $extra_class = 'first';
+      $extra_class[] = 'first';
     }
     if ($i == $num_items - 1) {
-      $extra_class = 'last';
+      $extra_class[] = 'last';
     }
+    $extra_class = implode(' ', $extra_class);
     $link = theme('menu_item_link', $data['link']);
     if ($data['below']) {
       $output .= theme('menu_item', $link, $data['link']['has_children'], menu_tree_output($data['below']), $data['link']['in_active_trail'], $extra_class);
@@ -1697,9 +1698,6 @@ function menu_rebuild() {
     return FALSE;
   }
 
-  // Encapsulate the rebuild in a transaction.
-  db_query('BEGIN');
-
   $menu = menu_router_build(TRUE);
   _menu_navigation_links_rebuild($menu);
   // Clear the menu, page and block caches.
@@ -1713,9 +1711,6 @@ function menu_rebuild() {
     variable_del('menu_rebuild_needed');
   }
   lock_release('menu_rebuild');
-  
-  db_query('COMMIT');
-  
   return TRUE;
 }
 

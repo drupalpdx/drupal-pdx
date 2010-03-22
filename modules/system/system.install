@@ -1,5 +1,5 @@
 <?php
-// $Id: system.install,v 1.238.2.19 2009/11/06 08:39:46 goba Exp $
+// $Id: system.install,v 1.238.2.22 2010/03/01 16:53:57 goba Exp $
 
 /**
  * Test and report Drupal installation requirements.
@@ -17,7 +17,7 @@ function system_requirements($phase) {
   // Report Drupal version
   if ($phase == 'runtime') {
     $requirements['drupal'] = array(
-      'title' => $t('Pressflow'),
+      'title' => $t('Drupal'),
       'value' => VERSION,
       'severity' => REQUIREMENT_INFO,
       'weight' => -10,
@@ -370,23 +370,23 @@ function system_install() {
   // uid 2 which is not what we want. So we insert the first user here, the
   // anonymous user. uid is 1 here for now, but very soon it will be changed
   // to 0.
-  db_query("INSERT INTO {users} (uid, name, mail) VALUES(%d, '%s', '%s')", 1, '', '');
+  db_query("INSERT INTO {users} (name, mail) VALUES('%s', '%s')", '', '');
   // We need some placeholders here as name and mail are uniques and data is
   // presumed to be a serialized array. Install will change uid 1 immediately
   // anyways. So we insert the superuser here, the uid is 2 here for now, but
   // very soon it will be changed to 1.
-  db_query("INSERT INTO {users} (uid, name, mail, created, data) VALUES(%d, '%s', '%s', %d, '%s')", 2, 'placeholder-for-uid-1', 'placeholder-for-uid-1', time(), serialize(array()));
+  db_query("INSERT INTO {users} (name, mail, created, data) VALUES('%s', '%s', %d, '%s')", 'placeholder-for-uid-1', 'placeholder-for-uid-1', time(), serialize(array()));
   // This sets the above two users uid 0 (anonymous). We avoid an explicit 0
   // otherwise MySQL might insert the next auto_increment value.
   db_query("UPDATE {users} SET uid = uid - uid WHERE name = '%s'", '');
   // This sets uid 1 (superuser). We skip uid 2 but that's not a big problem.
   db_query("UPDATE {users} SET uid = 1 WHERE name = '%s'", 'placeholder-for-uid-1');
 
-  db_query("INSERT INTO {role} (rid,name) VALUES (" . DRUPAL_ANONYMOUS_RID . ",'anonymous user')");
-  db_query("INSERT INTO {role} (rid,name) VALUES (" . DRUPAL_AUTHENTICATED_RID . ",'authenticated user')");
+  db_query("INSERT INTO {role} (name) VALUES ('%s')", 'anonymous user');
+  db_query("INSERT INTO {role} (name) VALUES ('%s')", 'authenticated user');
 
-  db_query("INSERT INTO {permission} (rid, perm, tid) VALUES (%d, '%s', %d)", DRUPAL_ANONYMOUS_RID, 'access content', 0);
-  db_query("INSERT INTO {permission} (rid, perm, tid) VALUES (%d, '%s', %d)", DRUPAL_AUTHENTICATED_RID, 'access comments, access content, post comments, post comments without approval', 0);
+  db_query("INSERT INTO {permission} (rid, perm, tid) VALUES (%d, '%s', %d)", 1, 'access content', 0);
+  db_query("INSERT INTO {permission} (rid, perm, tid) VALUES (%d, '%s', %d)", 2, 'access comments, access content, post comments, post comments without approval', 0);
 
   db_query("INSERT INTO {variable} (name, value) VALUES ('%s', '%s')", 'theme_default', 's:7:"garland";');
   db_query("UPDATE {system} SET status = %d WHERE type = '%s' AND name = '%s'", 1, 'theme', 'garland');
@@ -397,28 +397,28 @@ function system_install() {
   db_query("INSERT INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, '%s', %d, %d, %d)", 0, 0, 'all', 1, 0, 0);
 
   // Add input formats.
-  db_query("INSERT INTO {filter_formats} (format, name, roles, cache) VALUES (%d, '%s', '%s', %d)", 1, 'Filtered HTML', ',1,2,', 1);
-  db_query("INSERT INTO {filter_formats} (format, name, roles, cache) VALUES (%d, '%s', '%s', %d)", 2, 'Full HTML', '', 1);
+  db_query("INSERT INTO {filter_formats} (name, roles, cache) VALUES ('%s', '%s', %d)", 'Filtered HTML', ',1,2,', 1);
+  db_query("INSERT INTO {filter_formats} (name, roles, cache) VALUES ('%s', '%s', %d)", 'Full HTML', '', 1);
 
   // Enable filters for each input format.
 
   // Filtered HTML:
   // URL filter.
-  db_query("INSERT INTO {filters} (fid, format, module, delta, weight) VALUES (%d, %d, '%s', %d, %d)", 1,  1, 'filter', 2, 0);
+  db_query("INSERT INTO {filters} (format, module, delta, weight) VALUES (%d, '%s', %d, %d)", 1, 'filter', 2, 0);
   // HTML filter.
-  db_query("INSERT INTO {filters} (fid, format, module, delta, weight) VALUES (%d, %d, '%s', %d, %d)", 2, 1, 'filter', 0, 1);
+  db_query("INSERT INTO {filters} (format, module, delta, weight) VALUES (%d, '%s', %d, %d)", 1, 'filter', 0, 1);
   // Line break filter.
-  db_query("INSERT INTO {filters} (fid, format, module, delta, weight) VALUES (%d, %d, '%s', %d, %d)", 3, 1, 'filter', 1, 2);
+  db_query("INSERT INTO {filters} (format, module, delta, weight) VALUES (%d, '%s', %d, %d)", 1, 'filter', 1, 2);
   // HTML corrector filter.
-  db_query("INSERT INTO {filters} (fid, format, module, delta, weight) VALUES (%d, %d, '%s', %d, %d)", 4, 1, 'filter', 3, 10);
+  db_query("INSERT INTO {filters} (format, module, delta, weight) VALUES (%d, '%s', %d, %d)", 1, 'filter', 3, 10);
 
   // Full HTML:
   // URL filter.
-  db_query("INSERT INTO {filters} (fid, format, module, delta, weight) VALUES (%d, %d, '%s', %d, %d)", 5, 2, 'filter', 2, 0);
+  db_query("INSERT INTO {filters} (format, module, delta, weight) VALUES (%d, '%s', %d, %d)", 2, 'filter', 2, 0);
   // Line break filter.
-  db_query("INSERT INTO {filters} (fid, format, module, delta, weight) VALUES (%d, %d, '%s', %d, %d)", 6, 2, 'filter', 1, 1);
+  db_query("INSERT INTO {filters} (format, module, delta, weight) VALUES (%d, '%s', %d, %d)", 2, 'filter', 1, 1);
   // HTML corrector filter.
-  db_query("INSERT INTO {filters} (fid, format, module, delta, weight) VALUES (%d, %d, '%s', %d, %d)", 7, 2, 'filter', 3, 10);
+  db_query("INSERT INTO {filters} (format, module, delta, weight) VALUES (%d, '%s', %d, %d)", 2, 'filter', 3, 10);
 
   db_query("INSERT INTO {variable} (name, value) VALUES ('%s','%s')", 'filter_html_1', 'i:1;');
 
@@ -962,6 +962,31 @@ function system_schema() {
     'primary key' => array('mlid'),
     );
 
+  $schema['semaphore'] = array(
+    'description' => 'Table for holding semaphores, locks, flags, etc. that cannot be stored as Drupal variables since they must not be cached.',
+    'fields' => array(
+      'name' => array(
+        'description' => 'Primary Key: Unique name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''),
+      'value' => array(
+        'description' => 'A value.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''),
+      'expire' => array(
+        'description' => 'A Unix timestamp with microseconds indicating when the semaphore should expire.',
+        'type' => 'float',
+        'size' => 'big',
+        'not null' => TRUE),
+      ),
+    'indexes' => array('expire' => array('expire')),
+    'primary key' => array('name'),
+    );
+
   $schema['sessions'] = array(
     'description' => "Drupal's session handlers read and write into the sessions table. Each record represents a user session, either anonymous or authenticated.",
     'fields' => array(
@@ -1100,9 +1125,9 @@ function system_schema() {
         'not null' => TRUE,
         'default' => '')
       ),
-    'unique keys' => array('dst_language' => array('dst', 'language')),
+    'unique keys' => array('dst_language_pid' => array('dst', 'language', 'pid')),
     'primary key' => array('pid'),
-    'indexes' => array('src_language' => array('src', 'language')),
+    'indexes' => array('src_language_pid' => array('src', 'language', 'pid')),
     );
 
   return $schema;
@@ -2619,6 +2644,49 @@ function system_update_6052() {
 function system_update_6053() {
   $ret = array();
   db_add_index($ret, 'system', 'type_name', array(array('type', 12), 'name'));
+  return $ret;
+}
+
+/**
+ * Add semaphore table.
+ */
+function system_update_6054() {
+  $ret = array();
+
+  $schema['semaphore'] = array(
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''),
+      'value' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''),
+      'expire' => array(
+        'type' => 'float',
+        'size' => 'big',
+        'not null' => TRUE),
+      ),
+    'indexes' => array('expire' => array('expire')),
+    'primary key' => array('name'),
+  );
+  db_create_table($ret, 'semaphore', $schema['semaphore']);
+
+  return $ret;
+}
+
+/**
+ * Improve indexes on the {url_alias} table.
+ */
+function system_update_6055() {
+  $ret = array();
+  db_drop_index($ret, 'url_alias', 'src_language');
+  db_drop_unique_key($ret, 'url_alias', 'dst_language');
+  db_add_index($ret, 'url_alias', 'src_language_pid', array('src', 'language', 'pid'));
+  db_add_unique_key($ret, 'url_alias', 'dst_language_pid', array('dst', 'language', 'pid'));
   return $ret;
 }
 
