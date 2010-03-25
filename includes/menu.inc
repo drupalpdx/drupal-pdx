@@ -1698,9 +1698,6 @@ function menu_rebuild() {
     return FALSE;
   }
 
-  // Encapsulate the rebuild in a transaction.
-  db_query('BEGIN');
-
   $menu = menu_router_build(TRUE);
   _menu_navigation_links_rebuild($menu);
   // Clear the menu, page and block caches.
@@ -1714,9 +1711,6 @@ function menu_rebuild() {
     variable_del('menu_rebuild_needed');
   }
   lock_release('menu_rebuild');
-  
-  db_query('COMMIT');
-  
   return TRUE;
 }
 
