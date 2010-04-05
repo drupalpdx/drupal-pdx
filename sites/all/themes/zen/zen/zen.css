@@ -412,6 +412,16 @@
 	  margin:0 0 12px 0;
 	}
 	
+	.vote-up-down-widget-container .vote-up-down-widget-alt
+	{
+	  float:left;
+	}
+	
+	.vote-up-down-widget-container .field-label
+	{
+	  float:left;
+	}
+	
 	.node-type-presentation .fieldgroup .field
 	{
 	  margin:0;

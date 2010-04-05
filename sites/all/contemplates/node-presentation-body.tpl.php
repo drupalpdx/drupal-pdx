@@ -39,6 +39,13 @@
 </div>
 
 <div class="presentation-main">
+<?php if(!(empty($node->content['vote_up_down']['#value']))): ?>
+<div class="vote-up-down-widget-container field">
+  <?php print $node->content['vote_up_down']['#value']; ?>
+  <div class="field-label">Vote for this Presentation</div>
+  <div class="clear"></div>
+</div>
+<?php endif; ?>
 <?php print $node->content['body']['#value']; ?>
 
 <?php if(!(empty($node->field_topic_request_ref[0]['view']))): ?>
