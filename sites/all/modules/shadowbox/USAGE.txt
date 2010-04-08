@@ -1,0 +1,16 @@
+$Id: USAGE.txt,v 1.1.2.3 2010/01/03 22:52:15 psynaptic Exp $
+
+
+USAGE
+=====
+
+The module is integrated with filefield's image element so you can select from
+a number of different options for displaying images uploaded to nodes and shown
+in views. You need to have an imagecache preset to see display options for
+fields in nodes and views.
+
+If you need to integrate Shadowbox with some other Drupal module it is quite
+likely that you can do it on the theme layer. For instructions on manually
+crafting links, please see the official usage guide:
+
+  http://www.shadowbox-js.com/usage.html#markup

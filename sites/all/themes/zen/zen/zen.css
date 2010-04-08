@@ -34,6 +34,12 @@
     margin: 0;
     padding: 10px;
   }
+	
+	.emvideo-modal-iframe
+	{
+	  margin:0;
+	  padding:0;
+	}
 
   #page
   {
@@ -211,6 +217,13 @@
   {
   }
 
+  .clear
+	{
+	  clear:both;
+		display:block;
+		line-height:0.1em;
+	}
+
 /** navbar **/
   #navbar
   {
@@ -352,6 +365,7 @@
 
   .node .submitted /* The "posted by" information */
   {
+	  font-size:0.9em;
   }
 
   .node .terms /* Node terms (taxonomy) */
@@ -370,6 +384,68 @@
   {
     /* background-color: #ffffea; */ /* Drupal core uses a #ffffea background */
   }
+
+  .field .field-label-inline
+	{
+	  visibility:visible;
+	}
+	
+	.node-type-presentation
+	{
+	  min-width:700px;
+	}
+
+  .node-type-presentation .presentation-sidebar
+	{
+	  float:right;
+	  width: 200px;
+	}
+	
+	.node-type-presentation .presentation-main
+	{
+	  float:left;
+		width:480px;
+	}
+	
+	.node-type-presentation .field
+	{
+	  margin:0 0 12px 0;
+	}
+	
+	.vote-up-down-widget-container .vote-up-down-widget-alt
+	{
+	  float:left;
+	}
+	
+	.vote-up-down-widget-container .field-label
+	{
+	  float:left;
+	}
+	
+	.node-type-presentation .fieldgroup .field
+	{
+	  margin:0;
+	}
+	
+	.node-type-presentation .field-field-presentation-image .field-item
+	{
+	  /* float:left; */
+		margin:5px;
+	}
+	
+	.emvideo-thumbnail-replacement span
+	{
+	  background: url("images/emvideo-play.png");
+		height:82px;
+		left:50px;
+		top:4px;
+		width:62px;
+	}
+	
+	.emvideo-thumbnail-replacement span:hover
+	{
+	  background-position:-62px 0px;
+	}
 
 /** Drupal comments **/
   #comments /* Wrapper for the list of comments and its title */
